@@ -1,0 +1,17 @@
+[project]
+name = "kitty3000"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ceven Jupiter Knowles", email = "160178756+CevenJKnowles@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+kitty3000 = "kitty3000:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"

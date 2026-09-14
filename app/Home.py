@@ -102,6 +102,7 @@ with left:
                   x_label="seconds", y_label="", height=110)
 
     with st.expander("Only analyse a part of the recording"):
+        # MK: range slider: drag a dot to resize the snippet, click the track to jump the nearest dot there.
         start, end = st.slider("Seconds", 0.0, float(duration), (0.0, float(duration)), 0.1)
         snippet = data[int(start * sr):int(end * sr)]
 

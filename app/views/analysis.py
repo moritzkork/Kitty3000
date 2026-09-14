@@ -13,7 +13,6 @@ import streamlit as st
 API_URL = st.secrets["API_URL"]
 SAMPLES_DIR = "samples"
 
-st.set_page_config(page_title="Kitty3000 · Analysis", page_icon="🔬", layout="wide")
 st.header("🔬 Analysis – the nerdy stuff")
 
 

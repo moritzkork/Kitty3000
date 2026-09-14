@@ -103,13 +103,17 @@ with left:
 
     with st.expander("Only analyse a part of the recording"):
         start, end = st.slider("Seconds", 0.0, float(duration), (0.0, float(duration)), 0.1)
-    snippet = data[int(start * sr):int(end * sr)]
+        snippet = data[int(start * sr):int(end * sr)]
 
-    # MK: the API takes its own window around the loudest moment (11 s for PANNs / AST, 4 s chunks for the CNN),
-    # MK: so the user does not need to cut precisely. We send the snippet as mp3.
-    buffer = io.BytesIO()
-    sf.write(buffer, snippet, sr, format="MP3")
-    snippet_bytes = buffer.getvalue()
+        # MK: the API takes its own window around the loudest moment (11 s for PANNs / AST, 4 s chunks for the CNN),
+        # MK: so the user does not need to cut precisely. We send the snippet as mp3.
+        buffer = io.BytesIO()
+        sf.write(buffer, snippet, sr, format="MP3")
+        snippet_bytes = buffer.getvalue()
+
+        # MK: second player, so the user hears exactly the part that goes to the model
+        st.caption(f"This part goes to the model: {start:.1f} – {end:.1f} s ({end - start:.1f} s)")
+        st.audio(snippet_bytes)
 
     model = st.radio("Which model should listen?", model_names, horizontal=True)
     analyse = st.button("Analyse", type="primary", use_container_width=True)

@@ -116,7 +116,22 @@ with left:
         st.caption(f"This part goes to the model: {start:.1f} – {end:.1f} s ({end - start:.1f} s)")
         st.audio(snippet_bytes)
 
-    model = st.radio("Which model should listen?", model_names, horizontal=True)
+    #model = st.radio("Which model should listen?", model_names, horizontal=True)
+    cat_icons = {"panns": "🦁 PANNs", "ast": "🤖 AST", "cnn": "🐱 CNN"}
+    labels = []
+    label_to_model = {}
+    for name in model_names:
+        if name in cat_icons:
+            label = cat_icons[name]
+        else:
+            label = "🐾 " + name        # MK: a new model still gets a button, just a paw print
+        labels.append(label)
+        label_to_model[label] = name
+
+    chosen_label = st.segmented_control("Which cat should listen?", labels, default=labels[0])
+    if chosen_label is None:
+        chosen_label = labels[0]        # MK: segmented_control returns None if you deselect, keep a default
+    model = label_to_model[chosen_label]
     analyse = st.button("Analyse", type="primary", use_container_width=True)
 
 

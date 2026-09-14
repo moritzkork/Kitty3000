@@ -45,3 +45,7 @@ secrets.toml
 
 # User defined extras
 # Complete to your desire
+.streamlit/secrets.toml
+__pycache__/
+.venv/
+.DS_Store

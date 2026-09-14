@@ -81,8 +81,14 @@ with left:
         del st.session_state["source_name"]
         st.rerun()
 
-    # MK: show what is loaded and let the user (optionally) pick a part of it
-    data, sr = sf.read(io.BytesIO(audio_bytes))
+    # MK: show what is loaded and let the user (optionally) pick a part of it.
+    # MK: Some mp3s have broken headers (phones, sound archives) and libsndfile refuses them - say so instead of crashing.
+    try:
+        data, sr = sf.read(io.BytesIO(audio_bytes))
+    except Exception:
+        st.error("Could not read this file. Please use a normal mp3 or wav.")
+        st.stop()
+
     if data.ndim > 1:
         data = data.mean(axis=1)        # MK: stereo -> mono, only for the waveform and the trimming
     duration = len(data) / sr
@@ -129,9 +135,11 @@ with right:
     label = result["label"]
     probs = result["probs"]
 
-    # MK: the result: label big, the ten probabilities as bars
-    st.metric("Your cat is", label, f"{probs[label]:.0%} confident · model: {model}", delta_color="off")
+    # MK: the result: label big, the ten probabilities as bars.
+    # MK: If the API did not hear a cat, label is "Unknown" and not in probs, so we show the cat score instead.
+    if result["is_cat"]:
+        st.metric("Your cat is", label, f"{probs[label]:.0%} confident · model: {model}", delta_color="off")
+    else:
+        st.metric("Your cat is", "not a cat?", f"cat score {result['cat_score']:.2f} · model: {model}", delta_color="off")
+        st.warning("This does not sound like a cat. The mood below is what the model would guess anyway.")
     st.bar_chart(probs, horizontal=True, height=330)
-
-    if result["cat_score"] is not None and not result["is_cat"]:
-        st.warning(f"Not sure this is a cat (cat score {result['cat_score']:.2f})")

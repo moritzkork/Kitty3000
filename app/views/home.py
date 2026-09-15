@@ -14,6 +14,23 @@ import streamlit as st
 API_URL = st.secrets["API_URL"]
 SAMPLES_DIR = "samples"
 
+# MK: the sample clips, pinned in order. Number -> file in samples/ -> real name.
+# MK: In demo mode only the number shows; the real name is on my presenter note.
+SAMPLES = [
+    (1, "cat_complaining.mp3",       "Cat complaining"),
+    (2, "cat_meow.mp3",              "Meow"),
+    (3, "human_imitating_a_cat.mp3", "Human imitating a cat"),
+    (4, "two_cats_fighting.mp3",     "Two cats fighting"),
+]
+
+# MK: demo-mode toggle. On = samples show as "Sound 1, Sound 2, …" so the file name never reveals
+# MK: the mood on a shared screen. Off = real names, for normal use. It lives in the sidebar so it
+# MK: is out of the main shared view. I keep a note of what each "Sound N" really is (see below).
+demo_mode = st.sidebar.toggle(
+    "🎬 Demo mode – hide sample names",
+    value=False,
+    help="Shows samples as 'Sound 1, Sound 2 …' so the file name doesn't give away the mood when you share the screen.",
+)
 
 st.header("🐱 Kitty3000 – what does your cat say?")
 
@@ -59,15 +76,26 @@ with left:
                 st.rerun()
 
         with tab_samples:
-            sample_files = []
-            for name in sorted(os.listdir(SAMPLES_DIR)):
-                if name.endswith(".mp3") or name.endswith(".wav"):
-                    sample_files.append(name)
-            chosen = st.selectbox("Pick a sample", sample_files, index=None, placeholder="Pick a sample…", label_visibility="collapsed")
+            # MK: masked "Sound N" in demo mode, real names otherwise
+            labels = []
+            label_to_sample = {}
+            for number, filename, real_name in SAMPLES:
+                if demo_mode:
+                    label = "Sound " + str(number)
+                else:
+                    label = "Sound " + str(number) + " · " + real_name
+                labels.append(label)
+                label_to_sample[label] = (filename, "Sound " + str(number), real_name)
+            chosen = st.selectbox("Pick a sample", labels, index=None, placeholder="Pick a sample…", label_visibility="collapsed")
             if chosen is not None:
-                with open(os.path.join(SAMPLES_DIR, chosen), "rb") as f:
+                filename, masked_name, real_name = label_to_sample[chosen]
+                with open(os.path.join(SAMPLES_DIR, filename), "rb") as f:
                     st.session_state["audio"] = f.read()
-                st.session_state["source_name"] = "sample " + chosen
+                # MK: in demo mode store only "Sound N", so the "Loaded:" caption stays masked too
+                if demo_mode:
+                    st.session_state["source_name"] = masked_name
+                else:
+                    st.session_state["source_name"] = "sample " + real_name
                 st.rerun()
 
         st.info("Upload a file, record your cat or pick a sample to start.")
